@@ -34,11 +34,12 @@ public class SearchService {
 	private final Logger log = LoggerFactory.getLogger(SearchService.class);
 	
 	public SearchService(
+			RestTemplate restTemplate,
 			GooglePlacesConfig config,
 			UrlBuilder urlBuilder,
 			ResultFormatter resultFormatter,
 			KeywordFormatter keywordFormatter) {
-		this.restTemplate = new RestTemplate();
+		this.restTemplate = restTemplate;
 		this.config = config;
 		this.urlBuilder = urlBuilder;
 		this.resultFormatter = resultFormatter;
@@ -84,21 +85,6 @@ public class SearchService {
 	    return sb.toString().trim();
 	}
 	
-	private PlaceDetailsResponse getDetails(String placeId) {
-		
-		String url = urlBuilder.createGetDetailsUrl(placeId, config);
-		PlaceDetailsResponse detailsResponse = restTemplate.getForObject(url, PlaceDetailsResponse.class);
-		
-		if (detailsResponse != null && "OK".equals(detailsResponse.getStatus())) {
-			return detailsResponse;
-			
-		} else {
-			log.warn("Get Details returned status: {}",
-					detailsResponse == null ? "null response" : detailsResponse.getStatus());
-			return new PlaceDetailsResponse();
-		}
-	}
-	
 	public SendMessage handleTextMessage(Message message, long chatId) {
 
 		SendMessage reply = new SendMessage();
@@ -138,5 +124,20 @@ public class SearchService {
 		keywordCache.remove(chatId);
 		
 		return reply;
+	}
+	
+	PlaceDetailsResponse getDetails(String placeId) {
+
+		String url = urlBuilder.createGetDetailsUrl(placeId, config);
+		PlaceDetailsResponse detailsResponse = restTemplate.getForObject(url, PlaceDetailsResponse.class);
+
+		if (detailsResponse != null && "OK".equals(detailsResponse.getStatus())) {
+			return detailsResponse;
+
+		} else {
+			log.warn("Get Details returned status: {}",
+					detailsResponse == null ? "null response" : detailsResponse.getStatus());
+			return new PlaceDetailsResponse();
+		}
 	}
 }

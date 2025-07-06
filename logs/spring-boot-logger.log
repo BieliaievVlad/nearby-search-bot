@@ -1,0 +1,41 @@
+2025-07-06 15:00:12,112 INFO o.h.v.i.u.Version [background-preinit] HV000001: Hibernate Validator 8.0.2.Final
+2025-07-06 15:00:12,187 INFO o.s.b.StartupInfoLogger [main] Starting SearchBotApplication using Java 17.0.9 with PID 3268 (C:\workspace\nearby-search-bot\target\classes started by user in C:\workspace\nearby-search-bot)
+2025-07-06 15:00:12,188 INFO o.s.b.SpringApplication [main] No active profile set, falling back to 1 default profile: "default"
+2025-07-06 15:00:13,433 INFO o.s.b.w.e.t.TomcatWebServer [main] Tomcat initialized with port 8080 (http)
+2025-07-06 15:00:13,447 INFO o.a.j.l.DirectJDKLog [main] Initializing ProtocolHandler ["http-nio-8080"]
+2025-07-06 15:00:13,449 INFO o.a.j.l.DirectJDKLog [main] Starting service [Tomcat]
+2025-07-06 15:00:13,449 INFO o.a.j.l.DirectJDKLog [main] Starting Servlet engine: [Apache Tomcat/10.1.42]
+2025-07-06 15:00:13,532 INFO o.a.j.l.DirectJDKLog [main] Initializing Spring embedded WebApplicationContext
+2025-07-06 15:00:13,533 INFO o.s.b.w.s.c.ServletWebServerApplicationContext [main] Root WebApplicationContext: initialization completed in 1298 ms
+2025-07-06 15:00:13,646 WARN o.s.c.s.AbstractApplicationContext [main] Exception encountered during context initialization - cancelling refresh attempt: org.springframework.beans.factory.UnsatisfiedDependencyException: Error creating bean with name 'searchBot' defined in file [C:\workspace\nearby-search-bot\target\classes\com\bieliaiev\search_bot\bot\SearchBot.class]: Unsatisfied dependency expressed through constructor parameter 1: Error creating bean with name 'searchService' defined in file [C:\workspace\nearby-search-bot\target\classes\com\bieliaiev\search_bot\service\SearchService.class]: Unsatisfied dependency expressed through constructor parameter 0: No qualifying bean of type 'org.springframework.web.client.RestTemplate' available: expected at least 1 bean which qualifies as autowire candidate. Dependency annotations: {}
+2025-07-06 15:00:13,648 INFO o.a.j.l.DirectJDKLog [main] Stopping service [Tomcat]
+2025-07-06 15:00:13,659 INFO o.s.b.a.l.ConditionEvaluationReportLogger [main] 
+
+Error starting ApplicationContext. To display the condition evaluation report re-run your application with 'debug' enabled.
+2025-07-06 15:00:13,681 ERROR o.s.b.d.LoggingFailureAnalysisReporter [main] 
+
+***************************
+APPLICATION FAILED TO START
+***************************
+
+Description:
+
+Parameter 0 of constructor in com.bieliaiev.search_bot.service.SearchService required a bean of type 'org.springframework.web.client.RestTemplate' that could not be found.
+
+
+Action:
+
+Consider defining a bean of type 'org.springframework.web.client.RestTemplate' in your configuration.
+
+2025-07-06 15:03:18,163 INFO o.h.v.i.u.Version [background-preinit] HV000001: Hibernate Validator 8.0.2.Final
+2025-07-06 15:03:18,247 INFO o.s.b.StartupInfoLogger [main] Starting SearchBotApplication using Java 17.0.9 with PID 2944 (C:\workspace\nearby-search-bot\target\classes started by user in C:\workspace\nearby-search-bot)
+2025-07-06 15:03:18,248 INFO o.s.b.SpringApplication [main] No active profile set, falling back to 1 default profile: "default"
+2025-07-06 15:03:19,327 INFO o.s.b.w.e.t.TomcatWebServer [main] Tomcat initialized with port 8080 (http)
+2025-07-06 15:03:19,337 INFO o.a.j.l.DirectJDKLog [main] Initializing ProtocolHandler ["http-nio-8080"]
+2025-07-06 15:03:19,339 INFO o.a.j.l.DirectJDKLog [main] Starting service [Tomcat]
+2025-07-06 15:03:19,339 INFO o.a.j.l.DirectJDKLog [main] Starting Servlet engine: [Apache Tomcat/10.1.42]
+2025-07-06 15:03:19,414 INFO o.a.j.l.DirectJDKLog [main] Initializing Spring embedded WebApplicationContext
+2025-07-06 15:03:19,415 INFO o.s.b.w.s.c.ServletWebServerApplicationContext [main] Root WebApplicationContext: initialization completed in 1121 ms
+2025-07-06 15:03:19,823 INFO o.a.j.l.DirectJDKLog [main] Starting ProtocolHandler ["http-nio-8080"]
+2025-07-06 15:03:19,864 INFO o.s.b.w.e.t.TomcatWebServer [main] Tomcat started on port 8080 (http) with context path '/'
+2025-07-06 15:03:19,872 INFO o.s.b.StartupInfoLogger [main] Started SearchBotApplication in 2.232 seconds (process running for 2.646)
