@@ -9,17 +9,18 @@ import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import org.telegram.telegrambots.meta.generics.WebhookBot;
 
 import com.bieliaiev.search_bot.config.BotConfig;
+import com.bieliaiev.search_bot.handler.TelegramMessageHandler;
 import com.bieliaiev.search_bot.service.SearchService;
 
 @Component
 public class SearchBot implements WebhookBot {
 
 	private final BotConfig config;
-	private final SearchService service;
+	private final TelegramMessageHandler handler;
 
-	public SearchBot(BotConfig config, SearchService service) {
+	public SearchBot(BotConfig config, SearchService service, TelegramMessageHandler handler) {
 		this.config = config;
-		this.service = service;
+		this.handler = handler;
 	}
 
 	@Override
@@ -48,15 +49,20 @@ public class SearchBot implements WebhookBot {
 		if (!update.hasMessage()) {
 			return null;
 		}
-
+		
 		Message message = update.getMessage();
 		long chatId = message.getChatId();
 
 		if (message.hasText()) {
-			return service.handleTextMessage(message, chatId);
+	        String text = message.getText().trim();
+
+	        if ("/start".equalsIgnoreCase(text)) {
+	            return handler.handleStartCommand(chatId);
+	        }
+			return handler.handleTextMessage(message, chatId);
 
 		} else if (message.hasLocation()) {
-			return service.handleLocationMessage(message, chatId);
+			return handler.handleLocationMessage(message, chatId);
 
 		}
 		return null;

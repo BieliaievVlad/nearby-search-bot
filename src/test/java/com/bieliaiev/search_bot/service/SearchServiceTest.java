@@ -2,18 +2,24 @@ package com.bieliaiev.search_bot.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
+import java.util.ArrayList;
+import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
-
+import org.telegram.telegrambots.meta.api.objects.Location;
+import com.bieliaiev.search_bot.config.AppConfig;
 import com.bieliaiev.search_bot.config.GooglePlacesConfig;
+import com.bieliaiev.search_bot.dto.NearbySearchParams;
 import com.bieliaiev.search_bot.dto.PlaceDetailsResponse;
+import com.bieliaiev.search_bot.dto.PlacesResponse;
+import com.bieliaiev.search_bot.util.ResultFormatter;
 import com.bieliaiev.search_bot.util.UrlBuilder;
 
 @ExtendWith(MockitoExtension.class)
@@ -26,83 +32,119 @@ class SearchServiceTest {
     private RestTemplate restTemplate;
 
     @Mock
-    private GooglePlacesConfig config;
+    private GooglePlacesConfig googlePlacesConfig;
+    
+    @Mock
+    private AppConfig appConfig;
+    
+    @Mock
+    private ResultFormatter resultFormatter;
+    
+    @Mock
+    private PlaceDetailsService placeDetailsService;
 
     @InjectMocks
     private SearchService service;
 	
-	@Test
-	void testSearchNearby() {
-		fail("Not yet implemented");
-	}
+    @Test
+    void searchNearby_SuccessfulResponse_ReturnsResults() {
 
-	@Test
-	void testFormatResults() {
-		fail("Not yet implemented");
-	}
+    	NearbySearchParams params = NearbySearchParams.builder()
+    		    .location(new Location())
+    		    .keyword("sushi")
+    		    .build();
+        String url = "https://test-url";
+        PlacesResponse.Result result = new PlacesResponse.Result();
+        List<PlacesResponse.Result> expectedResults = List.of(result);
 
-	@Test
-	void testHandleTextMessage() {
-		fail("Not yet implemented");
-	}
+        PlacesResponse response = new PlacesResponse();
+        response.setStatus("OK");
+        response.setResults(expectedResults);
 
+        when(urlBuilder.createNearbySearchUrl(params, googlePlacesConfig)).thenReturn(url);
+        when(restTemplate.getForObject(url, PlacesResponse.class)).thenReturn(response);
+
+        List<PlacesResponse.Result> actualResults = service.searchNearby(params);
+
+        assertEquals(expectedResults, actualResults);
+    }
+
+    @Test
+    void searchNearby_StatusNotOk_ReturnsEmptyList() {
+    	NearbySearchParams params = NearbySearchParams.builder()
+    		    .location(new Location())
+    		    .keyword("sushi")
+    		    .build();
+        String url = "https://test-url";
+
+        PlacesResponse response = new PlacesResponse();
+        response.setStatus("ZERO_RESULTS");
+
+        when(urlBuilder.createNearbySearchUrl(params, googlePlacesConfig)).thenReturn(url);
+        when(restTemplate.getForObject(url, PlacesResponse.class)).thenReturn(response);
+
+        List<PlacesResponse.Result> results = service.searchNearby(params);
+
+        assertTrue(results.isEmpty());
+    }
+
+    @Test
+    void searchNearby_NullResponse_ReturnsEmptyList() {
+    	NearbySearchParams params = NearbySearchParams.builder()
+    		    .location(new Location())
+    		    .keyword("sushi")
+    		    .build();
+        String url = "https://test-url";
+
+        when(urlBuilder.createNearbySearchUrl(params, googlePlacesConfig)).thenReturn(url);
+        when(restTemplate.getForObject(url, PlacesResponse.class)).thenReturn(null);
+
+        List<PlacesResponse.Result> results = service.searchNearby(params);
+
+        assertTrue(results.isEmpty());
+    }
+
+    @Test
+    void searchNearby_ThrowsRestClientException_ReturnsEmptyList() {
+    	NearbySearchParams params = NearbySearchParams.builder()
+    		    .location(new Location())
+    		    .keyword("sushi")
+    		    .build();
+        String url = "https://test-url";
+
+        when(urlBuilder.createNearbySearchUrl(params, googlePlacesConfig)).thenReturn(url);
+        when(restTemplate.getForObject(url, PlacesResponse.class))
+                .thenThrow(new RestClientException("Connection error"));
+
+        List<PlacesResponse.Result> results = service.searchNearby(params);
+
+        assertTrue(results.isEmpty());
+    }
+    
 	@Test
-	void testHandleLocationMessage() {
-		fail("Not yet implemented");
-	}
-	
-	@Test
-	void getDetails_StatusIsOk_ReturnsExpectedResponse() {
+	void formatResults_EmptyResultsList_ReturnsExpectedMessage() {
 		
-		String placeId = "place_id";
-		String url = "https://some-url.com";
-		PlaceDetailsResponse expected = new PlaceDetailsResponse();
-		PlaceDetailsResponse.Result result = new PlaceDetailsResponse.Result();
-		expected.setResult(result);
-		expected.setStatus("OK");
+		String expected = "Ничего не найдено 😔";
 		
-		when(urlBuilder.createGetDetailsUrl(anyString(), any(GooglePlacesConfig.class))).thenReturn(url);
-		when(restTemplate.getForObject(anyString(), eq(PlaceDetailsResponse.class))).thenReturn(expected);
+		String actual = service.formatResults(new ArrayList<PlacesResponse.Result>());
 		
-		PlaceDetailsResponse actual = service.getDetails(placeId);
-		
-		verify(urlBuilder, times(1)).createGetDetailsUrl(anyString(), any(GooglePlacesConfig.class));
-		verify(restTemplate, times(1)).getForObject(anyString(), eq(PlaceDetailsResponse.class));
 		assertThat(actual).isEqualTo(expected);
 	}
 	
     @Test
-    void getDetails_StatusNotOk_ReturnsEmptyResponse() {
-    	
-        String placeId = "place_id";
-        String url = "https://some-url.com";
-        PlaceDetailsResponse failedResponse = new PlaceDetailsResponse();
-        failedResponse.setStatus("ZERO_RESULTS");
+    void formatResults_NotEmptyResultList_ReturnsExpectedMessage() {
 
-        when(urlBuilder.createGetDetailsUrl(placeId, config)).thenReturn(url);
-        when(restTemplate.getForObject(anyString(), eq(PlaceDetailsResponse.class))).thenReturn(failedResponse);
+    	String expected = "🍣 Sushi Place";
+        PlacesResponse.Result place = mock(PlacesResponse.Result.class);
+        PlaceDetailsResponse details = mock(PlaceDetailsResponse.class);
+        
+        when(appConfig.getLimit()).thenReturn(1);
+        when(place.getPlaceId()).thenReturn("abc123");        
+        when(placeDetailsService.getDetails("abc123")).thenReturn(details);
+        when(resultFormatter.buildPlacesMessage(place, details)).thenReturn(expected);
 
-        PlaceDetailsResponse actual = service.getDetails(placeId);
+        String actual = service.formatResults(List.of(place));
 
-        assertThat(actual.getResult()).isNull();
-        verify(urlBuilder).createGetDetailsUrl(placeId, config);
-        verify(restTemplate).getForObject(anyString(), eq(PlaceDetailsResponse.class));
-    }
-
-    @Test
-    void getDetails_NullResponse_ReturnsEmptyResponse() {
-
-        String placeId = "place_id";
-        String url = "https://some-url.com";
-
-        when(urlBuilder.createGetDetailsUrl(placeId, config)).thenReturn(url);
-        when(restTemplate.getForObject(anyString(), eq(PlaceDetailsResponse.class))).thenReturn(null);
-
-        PlaceDetailsResponse actual = service.getDetails(placeId);
-
-        assertThat(actual).isNotNull();
-        assertThat(actual.getResult()).isNull();
-        verify(urlBuilder).createGetDetailsUrl(placeId, config);
-        verify(restTemplate).getForObject(anyString(), eq(PlaceDetailsResponse.class));
+        assertThat(actual).isEqualTo(expected);
     }
 }

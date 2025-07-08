@@ -34,5 +34,36 @@ class KeywordFormatterTest {
 		assertThat(actual).isEqualTo(expected);
 	}
 	
-
+	@Test
+	void transliterate_EnglishText_ReturnsExpected() {
+		
+		String input = "SoMe TeXt";
+		String expected = "some text";
+		
+		String actual = formatter.transliterate(input);
+		
+		assertThat(actual).isEqualTo(expected);
+	}
+	
+	@Test
+	void transliterate_RussianText_ReturnsExpected() {
+		
+		String input = "КаКоЙ-тО тЕксТ";
+		String expected = "kakoi-to tekst";
+		
+		String actual = formatter.transliterate(input);
+		
+		assertThat(actual).isEqualTo(expected);
+	}
+	
+	@Test
+	void transliterate_UkrainianText_ReturnsExpected() {
+		
+		String input = "ЇжачОк";
+		String expected = "izhachok";
+		
+		String actual = formatter.transliterate(input);
+		
+		assertThat(actual).isEqualTo(expected);
+	}
 }

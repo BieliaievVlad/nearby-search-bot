@@ -13,19 +13,13 @@ import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
 
-import com.bieliaiev.search_bot.service.SearchService;
+import com.bieliaiev.search_bot.handler.TelegramMessageHandler;
 
 @ExtendWith(MockitoExtension.class)
 class SearchBotTest {
-
-	@Mock
-	private SearchService service;
 	
 	@Mock
-	private Update update;
-	
-	@Mock
-	private Message message;
+	private TelegramMessageHandler handler;
 	
 	@InjectMocks
 	private SearchBot bot;
@@ -34,13 +28,14 @@ class SearchBotTest {
 	void onWebhookUpdateReceived_TextMessage_ReturnsExpected() {
 		
 		long chatId = 12345L;
+		Message message = new Message();
 		SendMessage expected = new SendMessage(String.valueOf(chatId), "Text reply");
 
-		when(service.handleTextMessage(any(Message.class), anyLong())).thenReturn(expected);
+		when(handler.handleTextMessage(any(Message.class), anyLong())).thenReturn(expected);
 		
-		SendMessage actual = service.handleTextMessage(message, chatId);
+		SendMessage actual = handler.handleTextMessage(message, chatId);
 		
-		verify(service).handleTextMessage(any(Message.class), anyLong());
+		verify(handler).handleTextMessage(any(Message.class), anyLong());
 		assertThat(actual).isEqualTo(expected);
 	}
 	
@@ -48,13 +43,14 @@ class SearchBotTest {
 	void onWebhookUpdateReceived_LocationMessage_ReturnsExpected() {
 		
 		long chatId = 12345L;
+		Message message = new Message();
 		SendMessage expected = new SendMessage(String.valueOf(chatId), "Location reply");
 		
-		when(service.handleLocationMessage(any(Message.class), anyLong())).thenReturn(expected);
+		when(handler.handleLocationMessage(any(Message.class), anyLong())).thenReturn(expected);
 		
-		SendMessage actual = service.handleLocationMessage(message, chatId);
+		SendMessage actual = handler.handleLocationMessage(message, chatId);
 		
-		verify(service).handleLocationMessage(any(Message.class), anyLong());
+		verify(handler).handleLocationMessage(any(Message.class), anyLong());
 		assertThat(actual).isEqualTo(expected);
 	}
 	

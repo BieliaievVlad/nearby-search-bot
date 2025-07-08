@@ -19,7 +19,7 @@ public class KeywordFormatter {
 		}
 	}
 	
-	private String transliterate(String text) {
+	String transliterate(String text) {
 	    Map<Character, String> map = Map.ofEntries(
 	        Map.entry('а', "a"), Map.entry('б', "b"), Map.entry('в', "v"),
 	        Map.entry('г', "g"), Map.entry('ґ', "g"), Map.entry('д', "d"),
