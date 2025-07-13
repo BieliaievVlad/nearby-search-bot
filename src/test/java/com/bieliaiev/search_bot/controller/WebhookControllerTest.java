@@ -5,15 +5,17 @@ import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.ResponseEntity;
 import org.telegram.telegrambots.meta.api.methods.BotApiMethod;
 import org.telegram.telegrambots.meta.api.objects.Update;
 
 import com.bieliaiev.search_bot.bot.SearchBot;
 
+@ExtendWith(MockitoExtension.class)
 class WebhookControllerTest {
 	
 	@Mock
@@ -21,10 +23,6 @@ class WebhookControllerTest {
 	
 	@InjectMocks
 	private WebhookController controller;
-	
-	public WebhookControllerTest() {
-		MockitoAnnotations.openMocks(this);
-	}
 	
 	@Test
 	void onUpdateReceived_ValidUpdate_ReturnsExpectedResponse() {
@@ -40,5 +38,4 @@ class WebhookControllerTest {
 		assertThat(actual.getStatusCode().is2xxSuccessful()).isTrue();
 		assertThat(actual.getBody()).isEqualTo(expected);
 	}
-
 }

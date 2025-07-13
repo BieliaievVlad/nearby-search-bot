@@ -15,7 +15,4 @@ public class NearbySearchParams {
     private boolean rankbyDistance = true;
 	
 	private String keyword;
-	
-	@Builder.Default
-	private String language = "ru";
 }
