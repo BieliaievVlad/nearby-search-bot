@@ -19,12 +19,21 @@ import com.bieliaiev.search_bot.config.GooglePlacesConfig;
 import com.bieliaiev.search_bot.dto.NearbySearchParams;
 import com.bieliaiev.search_bot.dto.PlaceDetailsResponse;
 import com.bieliaiev.search_bot.dto.PlacesResponse;
+import com.bieliaiev.search_bot.lang.MessageKey;
+import com.bieliaiev.search_bot.lang.MessageProvider;
+import com.bieliaiev.search_bot.lang.MessageRU;
 import com.bieliaiev.search_bot.util.ResultFormatter;
 import com.bieliaiev.search_bot.util.UrlBuilder;
 
 @ExtendWith(MockitoExtension.class)
 class SearchServiceTest {
 
+	@Mock
+	private AppService appService;
+	
+	@Mock
+	private MessageProvider provider;
+	
     @Mock
     private UrlBuilder urlBuilder;
 
@@ -56,16 +65,19 @@ class SearchServiceTest {
         String url = "https://test-url";
         PlacesResponse.Result result = new PlacesResponse.Result();
         List<PlacesResponse.Result> expectedResults = List.of(result);
+        long chatId = 123L;
 
         PlacesResponse response = new PlacesResponse();
         response.setStatus("OK");
         response.setResults(expectedResults);
 
-        when(urlBuilder.createNearbySearchUrl(params, googlePlacesConfig)).thenReturn(url);
+        when(urlBuilder.createNearbySearchUrl(params, googlePlacesConfig, chatId)).thenReturn(url);
         when(restTemplate.getForObject(url, PlacesResponse.class)).thenReturn(response);
 
-        List<PlacesResponse.Result> actualResults = service.searchNearby(params);
+        List<PlacesResponse.Result> actualResults = service.searchNearby(params, chatId);
 
+        verify(urlBuilder, times(1)).createNearbySearchUrl(params, googlePlacesConfig, chatId);
+        verify(restTemplate, times(1)).getForObject(url, PlacesResponse.class);
         assertEquals(expectedResults, actualResults);
     }
 
@@ -76,15 +88,18 @@ class SearchServiceTest {
     		    .keyword("sushi")
     		    .build();
         String url = "https://test-url";
+        long chatId = 123L;
 
         PlacesResponse response = new PlacesResponse();
         response.setStatus("ZERO_RESULTS");
 
-        when(urlBuilder.createNearbySearchUrl(params, googlePlacesConfig)).thenReturn(url);
+        when(urlBuilder.createNearbySearchUrl(params, googlePlacesConfig, chatId)).thenReturn(url);
         when(restTemplate.getForObject(url, PlacesResponse.class)).thenReturn(response);
 
-        List<PlacesResponse.Result> results = service.searchNearby(params);
+        List<PlacesResponse.Result> results = service.searchNearby(params, chatId);
 
+        verify(urlBuilder, times(1)).createNearbySearchUrl(params, googlePlacesConfig, chatId);
+        verify(restTemplate, times(1)).getForObject(url, PlacesResponse.class);
         assertTrue(results.isEmpty());
     }
 
@@ -95,12 +110,15 @@ class SearchServiceTest {
     		    .keyword("sushi")
     		    .build();
         String url = "https://test-url";
+        long chatId = 123L;
 
-        when(urlBuilder.createNearbySearchUrl(params, googlePlacesConfig)).thenReturn(url);
+        when(urlBuilder.createNearbySearchUrl(params, googlePlacesConfig, chatId)).thenReturn(url);
         when(restTemplate.getForObject(url, PlacesResponse.class)).thenReturn(null);
 
-        List<PlacesResponse.Result> results = service.searchNearby(params);
+        List<PlacesResponse.Result> results = service.searchNearby(params, chatId);
 
+        verify(urlBuilder, times(1)).createNearbySearchUrl(params, googlePlacesConfig, chatId);
+        verify(restTemplate, times(1)).getForObject(url, PlacesResponse.class);
         assertTrue(results.isEmpty());
     }
 
@@ -111,13 +129,16 @@ class SearchServiceTest {
     		    .keyword("sushi")
     		    .build();
         String url = "https://test-url";
+        long chatId = 123L;
 
-        when(urlBuilder.createNearbySearchUrl(params, googlePlacesConfig)).thenReturn(url);
+        when(urlBuilder.createNearbySearchUrl(params, googlePlacesConfig, chatId)).thenReturn(url);
         when(restTemplate.getForObject(url, PlacesResponse.class))
                 .thenThrow(new RestClientException("Connection error"));
 
-        List<PlacesResponse.Result> results = service.searchNearby(params);
+        List<PlacesResponse.Result> results = service.searchNearby(params, chatId);
 
+        verify(urlBuilder, times(1)).createNearbySearchUrl(params, googlePlacesConfig, chatId);
+        verify(restTemplate, times(1)).getForObject(url, PlacesResponse.class);
         assertTrue(results.isEmpty());
     }
     
@@ -125,9 +146,15 @@ class SearchServiceTest {
 	void formatResults_EmptyResultsList_ReturnsExpectedMessage() {
 		
 		String expected = "Ничего не найдено 😔";
+		long chatId = 123L;
 		
-		String actual = service.formatResults(new ArrayList<PlacesResponse.Result>());
+		when(provider.prepareMessage(anyString(), eq(MessageKey.NOTHING_FOUND))).thenReturn(MessageRU.NOTHING_FOUND.getText());
+		when(appService.getLanguage(anyLong())).thenReturn("RU");
 		
+		String actual = service.formatResults(new ArrayList<PlacesResponse.Result>(), chatId);
+		
+		verify(provider, times(1)).prepareMessage(anyString(), eq(MessageKey.NOTHING_FOUND));
+		verify(appService, times(1)).getLanguage(anyLong());
 		assertThat(actual).isEqualTo(expected);
 	}
 	
@@ -137,14 +164,17 @@ class SearchServiceTest {
     	String expected = "🍣 Sushi Place";
         PlacesResponse.Result place = mock(PlacesResponse.Result.class);
         PlaceDetailsResponse details = mock(PlaceDetailsResponse.class);
+        long chatId = 123L;
         
         when(appConfig.getLimit()).thenReturn(1);
         when(place.getPlaceId()).thenReturn("abc123");        
         when(placeDetailsService.getDetails("abc123")).thenReturn(details);
-        when(resultFormatter.buildPlacesMessage(place, details)).thenReturn(expected);
+        when(resultFormatter.buildPlacesMessage(place, details, chatId)).thenReturn(expected);
 
-        String actual = service.formatResults(List.of(place));
+        String actual = service.formatResults(List.of(place), chatId);
 
+        verify(appConfig, times(2)).getLimit();
+        verify(place, times(1)).getPlaceId();
         assertThat(actual).isEqualTo(expected);
     }
 }

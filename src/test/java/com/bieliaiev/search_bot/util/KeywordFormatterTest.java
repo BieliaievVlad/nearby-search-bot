@@ -3,14 +3,11 @@ package com.bieliaiev.search_bot.util;
 import static org.assertj.core.api.Assertions.*;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
 class KeywordFormatterTest {
 
-	@InjectMocks
-	private KeywordFormatter formatter;
 	
 	@Test
 	void prepareKeyword_EnglishText_ReturnsExpected() {
@@ -18,7 +15,7 @@ class KeywordFormatterTest {
 		String input = "abcdefg";
 		String expected = "abcdefg";
 		
-		String actual = formatter.prepareKeyword(input);
+		String actual = KeywordFormatter.prepareKeyword(input);
 		
 		assertThat(actual).isEqualTo(expected);
 	}
@@ -29,7 +26,7 @@ class KeywordFormatterTest {
 		String input = "абвгде";
 		String expected = "абвгде|abvgde";
 		
-		String actual = formatter.prepareKeyword(input);
+		String actual = KeywordFormatter.prepareKeyword(input);
 		
 		assertThat(actual).isEqualTo(expected);
 	}
@@ -40,7 +37,7 @@ class KeywordFormatterTest {
 		String input = "SoMe TeXt";
 		String expected = "some text";
 		
-		String actual = formatter.transliterate(input);
+		String actual = KeywordFormatter.transliterate(input);
 		
 		assertThat(actual).isEqualTo(expected);
 	}
@@ -51,7 +48,7 @@ class KeywordFormatterTest {
 		String input = "КаКоЙ-тО тЕксТ";
 		String expected = "kakoi-to tekst";
 		
-		String actual = formatter.transliterate(input);
+		String actual = KeywordFormatter.transliterate(input);
 		
 		assertThat(actual).isEqualTo(expected);
 	}
@@ -62,7 +59,7 @@ class KeywordFormatterTest {
 		String input = "ЇжачОк";
 		String expected = "izhachok";
 		
-		String actual = formatter.transliterate(input);
+		String actual = KeywordFormatter.transliterate(input);
 		
 		assertThat(actual).isEqualTo(expected);
 	}

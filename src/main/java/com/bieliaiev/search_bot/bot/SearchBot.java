@@ -10,16 +10,20 @@ import org.telegram.telegrambots.meta.generics.WebhookBot;
 
 import com.bieliaiev.search_bot.config.BotConfig;
 import com.bieliaiev.search_bot.handler.TelegramMessageHandler;
-import com.bieliaiev.search_bot.service.SearchService;
+import com.bieliaiev.search_bot.service.AppService;
 
 @Component
 public class SearchBot implements WebhookBot {
 
 	private final BotConfig config;
+	private final AppService service;
 	private final TelegramMessageHandler handler;
 
-	public SearchBot(BotConfig config, SearchService service, TelegramMessageHandler handler) {
+	public SearchBot(BotConfig config,
+			AppService service,
+			TelegramMessageHandler handler) {
 		this.config = config;
+		this.service = service;
 		this.handler = handler;
 	}
 
@@ -45,7 +49,7 @@ public class SearchBot implements WebhookBot {
 
 	@Override
 	public BotApiMethod<?> onWebhookUpdateReceived(Update update) {
-
+		
 		if (!update.hasMessage()) {
 			return null;
 		}
@@ -53,12 +57,17 @@ public class SearchBot implements WebhookBot {
 		Message message = update.getMessage();
 		long chatId = message.getChatId();
 
+	    if (service.getLanguage(chatId) == null) {
+	    	return handler.handleSetLanguageMessage(message, chatId);
+	    }
+
 		if (message.hasText()) {
 	        String text = message.getText().trim();
 
 	        if ("/start".equalsIgnoreCase(text)) {
 	            return handler.handleStartCommand(chatId);
 	        }
+	        
 			return handler.handleTextMessage(message, chatId);
 
 		} else if (message.hasLocation()) {

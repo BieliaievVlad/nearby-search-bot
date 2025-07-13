@@ -2,6 +2,7 @@ package com.bieliaiev.search_bot.dto;
 
 import java.util.List;
 
+import com.bieliaiev.search_bot.lang.StaticStrings;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
@@ -41,7 +42,7 @@ public class PlacesResponse {
         	} else if (vicinity != null && !vicinity.isEmpty()) {
         		return vicinity;
         	}
-			return "Адрес не указан.";
+			return StaticStrings.DASH;
         }
 
     }

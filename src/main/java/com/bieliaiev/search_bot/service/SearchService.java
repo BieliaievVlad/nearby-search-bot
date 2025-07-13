@@ -12,7 +12,8 @@ import com.bieliaiev.search_bot.config.GooglePlacesConfig;
 import com.bieliaiev.search_bot.dto.NearbySearchParams;
 import com.bieliaiev.search_bot.dto.PlaceDetailsResponse;
 import com.bieliaiev.search_bot.dto.PlacesResponse;
-import com.bieliaiev.search_bot.util.KeywordFormatter;
+import com.bieliaiev.search_bot.lang.MessageKey;
+import com.bieliaiev.search_bot.lang.MessageProvider;
 import com.bieliaiev.search_bot.util.ResultFormatter;
 import com.bieliaiev.search_bot.util.UrlBuilder;
 
@@ -20,6 +21,8 @@ import com.bieliaiev.search_bot.util.UrlBuilder;
 public class SearchService {
 
 	private final AppConfig appConfig;
+	private final AppService service;
+	private final MessageProvider provider;
 	private final PlaceDetailsService placeDetailsService;
 	private final GooglePlacesConfig googlePlacesConfig;
 	private final RestTemplate restTemplate;
@@ -29,13 +32,16 @@ public class SearchService {
 	
 	public SearchService(
 			AppConfig appConfig,
+			AppService service,
+			MessageProvider provider,
 			PlaceDetailsService placeDetailsService,
 			RestTemplate restTemplate,
 			GooglePlacesConfig googlePlacesConfig,
 			UrlBuilder urlBuilder,
-			ResultFormatter resultFormatter,
-			KeywordFormatter keywordFormatter) {
+			ResultFormatter resultFormatter) {
 		this.appConfig = appConfig;
+		this.service = service;
+		this.provider = provider;
 		this.placeDetailsService = placeDetailsService;
 		this.restTemplate = restTemplate;
 		this.googlePlacesConfig = googlePlacesConfig;
@@ -43,9 +49,9 @@ public class SearchService {
 		this.resultFormatter = resultFormatter;
 	}
 	
-	public List<PlacesResponse.Result> searchNearby(NearbySearchParams params) {
+	public List<PlacesResponse.Result> searchNearby(NearbySearchParams params, long chatId) {
 	    try {
-	        String url = urlBuilder.createNearbySearchUrl(params, googlePlacesConfig);
+	        String url = urlBuilder.createNearbySearchUrl(params, googlePlacesConfig, chatId);
 	        PlacesResponse placesResponse = restTemplate.getForObject(url, PlacesResponse.class);
 
 	        if (placesResponse != null && "OK".equals(placesResponse.getStatus())) {
@@ -62,10 +68,10 @@ public class SearchService {
 	    return Collections.emptyList();
 	}
 	
-	public String formatResults(List<PlacesResponse.Result> results) {
+	public String formatResults(List<PlacesResponse.Result> results, long chatId) {
 		
 	    if (results.isEmpty()) {
-	        return "Ничего не найдено 😔";
+	    	return provider.prepareMessage(service.getLanguage(chatId), MessageKey.NOTHING_FOUND);
 	    }
 
 	    int limit = calculateLimit(results);
@@ -75,7 +81,7 @@ public class SearchService {
 	    for (int i = 0; i < limit; i++) {
 	        PlacesResponse.Result place = results.get(i);
 	        PlaceDetailsResponse details = placeDetailsService.getDetails(place.getPlaceId());
-	        sb.append(resultFormatter.buildPlacesMessage(place, details));
+	        sb.append(resultFormatter.buildPlacesMessage(place, details, chatId));
 	    }
 
 	    return sb.toString().trim();
@@ -89,5 +95,9 @@ public class SearchService {
 	    } else {
 	    	return appConfig.getLimit();
 	    }
+	}
+	
+	public String setupSendMessageParseMode() {
+		return appConfig.getParseMode();
 	}
 }

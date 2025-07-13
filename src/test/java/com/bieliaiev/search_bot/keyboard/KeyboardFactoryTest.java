@@ -17,7 +17,7 @@ class KeyboardFactoryTest {
         assertThat(keyboard.getKeyboard().get(0)).hasSize(1);
 
         KeyboardButton button = keyboard.getKeyboard().get(0).get(0);
-        assertThat(button.getText()).isEqualTo("Поделиться местоположением");
+        assertThat(button.getText()).isEqualTo("🌍");
         assertThat(button.getRequestLocation()).isTrue();
 
         assertThat(keyboard.getResizeKeyboard()).isTrue();

@@ -2,9 +2,9 @@ package com.bieliaiev.search_bot.util;
 
 import java.util.Map;
 
-import org.springframework.stereotype.Component;
+import lombok.experimental.UtilityClass;
 
-@Component
+@UtilityClass
 public class KeywordFormatter {
 
 	public String prepareKeyword (String original) {
