@@ -60,6 +60,7 @@ public class SearchService {
 
 	        log.warn("Search nearby returned status: {}",
 	                placesResponse == null ? "null response" : placesResponse.getStatus());
+	        log.warn("Google error message: {}", placesResponse.getErrorMessage());
 
 	    } catch (RestClientException e) {
 	        log.error("Failed to search nearby", e);

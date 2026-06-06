@@ -14,6 +14,7 @@ public class PlacesResponse {
 
 	private List<Result> results;
 	private String status;
+	private String errorMessage;
 	
 	@Data
 	@JsonIgnoreProperties(ignoreUnknown = true)
@@ -33,6 +34,9 @@ public class PlacesResponse {
 
         @JsonProperty("place_id")
         private String placeId;
+        
+        @JsonProperty("error_message")
+        private String errorMessage;
         
         public String getAddress() {
         	
